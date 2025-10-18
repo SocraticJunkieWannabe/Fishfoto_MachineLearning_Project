@@ -82,60 +82,6 @@ def extractImageBoxFromPrediciton(results, img_path, image_name, output_single_f
                             cv2.imwrite(os.path.join(output_single_folder, crop_name), crop)
                             save_images.append(crop)
           
-def extractFishShapeFromBundle(img, output_folder : str, bundle_id : int):  
-    results = model.predict(img, 
-                            imgsz=1280, 
-                            conf=0.3, 
-                            iou=0.5,
-                            max_det=150
-                            )
-    
-    orig_h, orig_w = img.shape[:2]
-     
-    for i, result in enumerate(results):
-        if result.masks is not None:
-            masks = result.masks.data.cpu().numpy()  # shape: (N, H_model, W_model)
-            
-            for j, mask in enumerate(masks):
-                # Resize mask to original image size
-                mask_resized = cv2.resize(mask, (orig_w, orig_h))
-                mask_uint8 = (mask_resized * 255).astype(np.uint8)
-
-                # Create RGBA image
-                rgba = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-                rgba[:, :, 3] = mask_uint8  # alpha = mask
-
-                cv2.imwrite(f"{output_folder}/bundle-{bundle_id}_object_{i}_{j}.png", rgba)
-
-    pass
-                            
-def extractImageShapeFromPrediciton(results, img_path, output_single_folder):
-    orig = cv2.imread(img_path)
-    orig_h, orig_w = orig.shape[:2]
-
-    for i, result in enumerate(results):
-        if result.masks is not None:
-            masks = result.masks.data.cpu().numpy()  # shape: (N, H_model, W_model)
-            
-            for j, mask in enumerate(masks):
-                # Resize mask to original image size
-                mask_resized = cv2.resize(mask, (orig_w, orig_h))
-                mask_uint8 = (mask_resized * 255).astype(np.uint8)
-
-                # Create RGBA image
-                rgba = cv2.cvtColor(orig, cv2.COLOR_BGR2BGRA)
-                rgba[:, :, 3] = mask_uint8  # alpha = mask
-                
-                box = results[i].boxes[j]
-                crop = getBoxImage(box, orig)
-                
-                if crop.shape[0] > 1500 or crop.shape[1] > 1500:
-                    #process to extract single from bundle
-                    cv2.imwrite(f"{output_single_folder}/test.png", crop)
-                    extractFishShapeFromBundle(crop, output_single_folder, i)
-                else:
-                    cv2.imwrite(f"{output_single_folder}/object_{i}_{j}.png", rgba)
-    pass
 
 # 1. Load a pretrained YOLO model (try the large one for better accuracy)
 model = YOLO("yolov8x-seg.pt")  # or yolov11x.pt if available
@@ -144,7 +90,13 @@ images_path = "../../data"
 
 save_images = []
 
-def extractFishesFromImage(input_folder: str, single_output_folder : str, bundle_output_folder : str):
+def splitLabeledImages():
+    
+    extractFishesFromImages()
+    
+    pass
+
+def extractFishesFromImages(input_folder: str, single_output_folder : str, bundle_output_folder : str):
     # 2. Input and output folders
     input_folder = f"{images_path}/{input_folder}"
     output_single_folder = f"{images_path}/{single_output_folder}"
@@ -176,4 +128,4 @@ def extractFishesFromImage(input_folder: str, single_output_folder : str, bundle
 
 
 
-extractFishesFromImage("raw_images", "fish_crops", "bundle_crops")
+extractFishesFromImages("Tests/test_raw_images", "Tests/test_fish_crops", "Tests/test_bundle_crops")
