@@ -7,8 +7,11 @@ def deleteFolderContent(folder_path : str):
 
 def cleanFishAndBundleCrops():
     
-    deleteFolderContent("../../data/bundle_crops")
-    deleteFolderContent("../../data/fish_crops")
+    folders = ["test_bundle_crops", "shape_fish_crops", "box_fish_crops", "pseudo_mixtures"]
+    
+    for folder in folders:
+        deleteFolderContent(f"../../data/Tests/{folder}")
+    
     
     pass
 

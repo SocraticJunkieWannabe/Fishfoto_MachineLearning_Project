@@ -34,7 +34,7 @@ class Sorter():
 class ShapeSorter(Sorter):
     
     def extractFishImageFromBundle(self, img, bundle_id : int):
-        results = super().model.predict(img, 
+        results = self.model.predict(img, 
                                 imgsz=1280, 
                                 conf=0.3, 
                                 iou=0.5,
@@ -59,7 +59,7 @@ class ShapeSorter(Sorter):
                     cv2.imwrite(f"{self.output_single_folder}/bundle-{bundle_id}_object_{i}_{j}.png", rgba)
         pass
     
-    def extractImageFromPrediciton(self, results, img_path):
+    def extractImageFromPrediciton(self, results, img_path, image_name):
         orig = cv2.imread(img_path)
         orig_h, orig_w = orig.shape[:2]
 
@@ -82,9 +82,9 @@ class ShapeSorter(Sorter):
                     if crop.shape[0] > 1500 or crop.shape[1] > 1500:
                         #process to extract single from bundle
                         cv2.imwrite(f"{self.output_single_folder}/test.png", crop)
-                        self.extractFishImageFromBundle(crop, super().output_single_folder, i)
+                        self.extractFishImageFromBundle(crop, i)
                     else:
-                        cv2.imwrite(f"{self.output_single_folder}/object_{i}_{j}.png", rgba)
+                        cv2.imwrite(f"{self.output_single_folder}/object_{i}_{j}.png", super().getBoxImage(box, rgba))
         pass
     
 class BoxSorter(Sorter):
@@ -110,7 +110,7 @@ class BoxSorter(Sorter):
                 imageExists = super().checkIfImageDuplicateExists(crop)
                 if not imageExists:
                     cv2.imwrite(os.path.join(self.output_single_folder, crop_name), crop)
-                    super().save_images.append(crop)
+                    self.save_images.append(crop)
                     
     def extractImageFromPrediciton(self, results, img_path, image_name):
         for i, box in enumerate(results[0].boxes):
@@ -135,4 +135,4 @@ class BoxSorter(Sorter):
                             #save
                             if not os.path.isfile(crop_name):
                                 cv2.imwrite(os.path.join(self.output_single_folder, crop_name), crop)
-                                super().save_images.append(crop)
+                                self.save_images.append(crop)
