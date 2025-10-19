@@ -6,11 +6,9 @@ import numpy as np
 
 class Sorter():
     
-    def __init__(self, model, output_single_folder, output_bundle_folder, DEBUG_FLAG : bool = False):
+    def __init__(self, model,  DEBUG_FLAG : bool = False):
         self.model = model
         self.save_images = []
-        self.output_single_folder = output_single_folder
-        self.output_bundle_folder = output_bundle_folder
         pass
     
     def extractFishImageFromBundle(self):
@@ -33,12 +31,13 @@ class Sorter():
     
 class ShapeSorter(Sorter):
     
-    def extractFishImageFromBundle(self, img, bundle_id : int):
+    def extractFishImageFromBundle(self, img, bundle_id : int, output_folder, image_name):
         results = self.model.predict(img, 
                                 imgsz=1280, 
                                 conf=0.3, 
                                 iou=0.5,
-                                max_det=150
+                                max_det=150,
+                                verbose=False
                                 )
         
         orig_h, orig_w = img.shape[:2]
@@ -56,10 +55,10 @@ class ShapeSorter(Sorter):
                     rgba = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
                     rgba[:, :, 3] = mask_uint8  # alpha = mask
 
-                    cv2.imwrite(f"{self.output_single_folder}/bundle-{bundle_id}_object_{i}_{j}.png", rgba)
+                    cv2.imwrite(f"{output_folder}/{image_name}_bundle-{bundle_id}_fish_{j}.png", rgba)
         pass
     
-    def extractImageFromPrediciton(self, results, img_path, image_name):
+    def extractImageFromPrediciton(self, results, img_path, image_name, output_folder):
         orig = cv2.imread(img_path)
         orig_h, orig_w = orig.shape[:2]
 
@@ -81,20 +80,20 @@ class ShapeSorter(Sorter):
                     
                     if crop.shape[0] > 1500 or crop.shape[1] > 1500:
                         #process to extract single from bundle
-                        cv2.imwrite(f"{self.output_single_folder}/test.png", crop)
-                        self.extractFishImageFromBundle(crop, i)
+                        self.extractFishImageFromBundle(crop, i, output_folder, image_name)
                     else:
-                        cv2.imwrite(f"{self.output_single_folder}/object_{i}_{j}.png", super().getBoxImage(box, rgba))
+                        cv2.imwrite(f"{output_folder}/{image_name}_fish_{j}.png", super().getBoxImage(box, rgba))
         pass
     
 class BoxSorter(Sorter):
     
-    def extractFishImageFromBundle(self, img, image_name, bundle_id : int):
+    def extractFishImageFromBundle(self, img, image_name, bundle_id : int, output_folder):
         results = self.model.predict(img, 
                                 imgsz=1280, 
                                 conf=0.3, 
                                 iou=0.5,
-                                max_det=150
+                                max_det=150,
+                                verbose=False
                                 )
         
         for i, box in enumerate(results[0].boxes):
@@ -109,10 +108,10 @@ class BoxSorter(Sorter):
                 
                 imageExists = super().checkIfImageDuplicateExists(crop)
                 if not imageExists:
-                    cv2.imwrite(os.path.join(self.output_single_folder, crop_name), crop)
+                    cv2.imwrite(os.path.join(output_folder, crop_name), crop)
                     self.save_images.append(crop)
                     
-    def extractImageFromPrediciton(self, results, img_path, image_name):
+    def extractImageFromPrediciton(self, results, img_path, image_name, output_folder):
         for i, box in enumerate(results[0].boxes):
                 cls = int(box.cls)
                 conf = float(box.conf)
@@ -130,9 +129,9 @@ class BoxSorter(Sorter):
                     if not imageExists:
                         if crop.shape[0] > 1500:
                             #process to extract single from bundle
-                            self.extractFishImageFromBundle(crop, image_name, i)
+                            self.extractFishImageFromBundle(crop, image_name, i, output_folder)
                         else:
                             #save
                             if not os.path.isfile(crop_name):
-                                cv2.imwrite(os.path.join(self.output_single_folder, crop_name), crop)
+                                cv2.imwrite(os.path.join(output_folder, crop_name), crop)
                                 self.save_images.append(crop)

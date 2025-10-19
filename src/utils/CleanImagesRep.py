@@ -5,7 +5,7 @@ def deleteFolderContent(folder_path : str):
         os.remove(f"{folder_path}/{file_name}")
     pass 
 
-def cleanFishAndBundleCrops():
+def cleanTestFishAndBundleCrops():
     
     folders = ["test_bundle_crops", "shape_fish_crops", "box_fish_crops", "pseudo_mixtures"]
     
@@ -15,4 +15,17 @@ def cleanFishAndBundleCrops():
     
     pass
 
-cleanFishAndBundleCrops()
+def cleanProdCrops():
+    folders = ["herring", "sprat"]
+    
+    for folder in folders:
+        deleteFolderContent(f"../../data/Identified_Single_Fishes/{folder}")
+    
+    pass
+
+def cleanAllReps():
+    cleanTestFishAndBundleCrops()
+    cleanProdCrops()
+    pass
+
+cleanAllReps()
