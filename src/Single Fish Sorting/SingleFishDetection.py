@@ -8,9 +8,11 @@ import Sorters
 
 
 class SingleFishClassification():
+    
     def __init__(self, model_file_name, mode : str = "test", sorterType : str = "shape"):
-        
         """
+        
+        Class used to split batch images of fishes into single images, stored in the "./data/Identified_Single_Fishes" folder
         
         Input:
         
