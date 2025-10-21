@@ -30,15 +30,19 @@ def createPseudoMixturesDataset(fish_per_layer : int, num_layers : int = 2, size
     
     total_images = fish_per_layer * num_layers
     
-    for i in range(sizeDataset):
+    images_already_generated = len(os.listdir(pseudo_mixture_path))
+    
+    for i in range(sizeDataset - images_already_generated):
         
         start_time = time.time()
         
         spratRatio = random.uniform(spratRatioBoundaries[0], spratRatioBoundaries[1])
         image = createPseudoMixtureImage(createArrayOfSingleFish(spratRatio, total_images), num_layers, fish_per_layer)
-        image.save(f"{pseudo_mixture_path}/Image_{i+1}_sprat-ratio_{round(spratRatio, 3)}.png")
         
-        print(f"Image {i+1} created, taking {round(time.time() - start_time)} seconds")
+        image = image.convert("RGB")
+        image.save(f"{pseudo_mixture_path}/Image_{images_already_generated+i+1}_sprat-ratio_{round(spratRatio, 3)}.jpg", "JPEG")
+        
+        print(f"Image {images_already_generated+i+1} created, taking {round(time.time() - start_time)} seconds")
     
     pass
 
