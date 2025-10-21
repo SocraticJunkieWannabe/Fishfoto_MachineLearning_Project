@@ -3,6 +3,7 @@
 /!\ Les photos sont pas dans le GitHub faut les télécharger et les mettre dans un dossier root de la rep called "Images"
 
 (c'est les photos downloaded from le dossier "BIAS kalapildid" dans le sharepoint du pelo ou depuis ce lien: https://ibb.co/album/TBq199)
+(link to the Pseudo Mixtures: https://ibb.co/album/s5Z6yQ)
 
 Pour bien etre a jour:
 
