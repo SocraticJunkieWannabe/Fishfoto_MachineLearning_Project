@@ -10,6 +10,19 @@ Pour bien etre a jour:
  - Importer les images de "BIAS kalapildid" dans data/Stock Images
  - run le setup.py
 
+HOW TO DOWNLOAD IMAGES FROM ibb LINK:
+
+    1. In the albmu Go to Embed Codes and select HTML Image from the dropdown
+
+    2. Copy the entire text field, paste it into a text document. Save the document as album.html
+
+    3. Open the document. Ctrl + I
+
+    4. On the Media tab click Select All and Save As
+
+    5. Select/ create a folder and wait for the download to complete (may take some time)
+
+
 INFO:
 
 Le fichier indexed_images_config.json contient l'indexaction des photos en fonction de leur type (poisson mix vs indetifier), créer avec IndexImages.py
