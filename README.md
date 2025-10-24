@@ -32,3 +32,4 @@ Le fichier SingleFishDetection dans Single Fish Sorting permet de split les imag
 TO DO:
 
  - Fix function Image_Processing function to remove bright red and blue hues in images
+ - Create feature to identify and extract just the fish mixture rectanle from the Mixtures images
