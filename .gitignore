@@ -4,3 +4,4 @@
 *.png
 *.json
 *.pyc
+src/ImageIndexing_Sorting/indexed_images_config.json
