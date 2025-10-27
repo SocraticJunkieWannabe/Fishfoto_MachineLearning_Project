@@ -20,6 +20,7 @@ class IndexImages():
         self.stock_images_path = stock_images_path
         self.target_sorted_copy_path = target_sorted_copy_path
         
+        self.standardizeImageNames()
         self.setImageConfigFile(self.extractImageNames())
         
         pass
@@ -40,6 +41,19 @@ class IndexImages():
             f.write(json_str)
             
         pass
+    
+    def standardizeImageNames(self):
+        folderContent = os.listdir(self.stock_images_path)
+        for fileName in folderContent:
+            if fileName.split(".")[-1] == "jpg":
+                old_filename = fileName
+                fileName = fileName.replace("_", " ")
+                fileName = fileName.replace("-", " ")
+                
+                fileName = fileName.replace(" ", "_")
+                
+                os.rename(f"{self.stock_images_path}/{old_filename}", f"{self.stock_images_path}/{fileName}")
+        pass
 
     def extractImageNames(self):
         
@@ -52,7 +66,7 @@ class IndexImages():
         folderContent = os.listdir(self.stock_images_path)
         for fileName in folderContent:
             if fileName.split(".")[-1] == "jpg":
-                typeRaw = fileName.split(" ")[-2]
+                typeRaw = fileName.split("_")[1]
                 
                 typeEst = ""
                 for character in list(typeRaw):
@@ -74,4 +88,5 @@ class IndexImages():
             for image_name in data[key]:
                 os.makedirs(f"{self.target_sorted_copy_path}/{key}", exist_ok=True)
                 shutil.copyfile(f"{self.stock_images_path}/{image_name}", f"{self.target_sorted_copy_path}/{key}/{image_name}")
+                
                     
