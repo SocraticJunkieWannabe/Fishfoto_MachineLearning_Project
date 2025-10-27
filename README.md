@@ -4,6 +4,7 @@
 
 (c'est les photos downloaded from le dossier "BIAS kalapildid" dans le sharepoint du pelo ou depuis ce lien: https://ibb.co/album/TBq199)
 (link to the Pseudo Mixtures: https://ibb.co/album/s5Z6yQ)
+THe pseudo mxitures image go into the "data/Peudo_Mixtures"
 
 Pour bien etre a jour:
 
@@ -21,11 +22,6 @@ HOW TO DOWNLOAD IMAGES FROM ibb LINK:
     4. On the Media tab click Select All and Save As
 
     5. Select/ create a folder and wait for the download to complete (may take some time)
-
-
-NOTE:
- 
-THe pseudo mxitures image go into the "data/Peudo_Mixtures"
 
 INFO:
 
