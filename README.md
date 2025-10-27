@@ -23,6 +23,10 @@ HOW TO DOWNLOAD IMAGES FROM ibb LINK:
     5. Select/ create a folder and wait for the download to complete (may take some time)
 
 
+NOTE:
+ 
+THe pseudo mxitures image go into the "data/Peudo_Mixtures"
+
 INFO:
 
 Le fichier indexed_images_config.json contient l'indexaction des photos en fonction de leur type (poisson mix vs indetifier), créer avec IndexImages.py
