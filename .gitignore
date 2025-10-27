@@ -2,3 +2,5 @@
 *.jpeg
 *.pt
 *.png
+*.json
+*.pyc
