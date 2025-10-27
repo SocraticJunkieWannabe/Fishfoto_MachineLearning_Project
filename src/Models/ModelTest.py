@@ -4,6 +4,13 @@ from torch import nn
 from PIL import Image
 from torchvision import transforms
 
+import pandas as pd
+import os
+import numpy as np
+
+df = pd.read_csv('../../data/percentages.csv', sep=";")
+print(df)
+
 #FROM CNN#
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -36,5 +43,51 @@ def predict_ratio(model, image_path):
         ratio = model(image).item()
     return ratio
 
-ratio = predict_ratio(model, "test_crop.jpg")
-print(f"Predicted ratio of sprat: {ratio:.2f}")
+def testAgainstAllStockMixtures():
+    mixtures_images_path = "../../data/Labeled Images/mixture"
+    
+    folderContent = os.listdir(mixtures_images_path)
+    ratios = []
+    
+    for fileName in folderContent:
+        print(f"testing model on {fileName}")
+        output = testModelOnImage(f"{mixtures_images_path}/{fileName}")
+        if output != None:
+            ratios.append(output)
+        
+    print(computeError(ratios))
+    
+    pass
+
+
+def testModelOnImage(image_path):
+    
+    #True Ratio Extraction
+    image_file_name = image_path.split("/")[-1]
+    haulNumber = image_file_name.split("_")[0].split("T")[1]
+    
+    if haulNumber not in df.columns:
+        return None
+
+    predicted_ratio = predict_ratio(model, image_path)
+
+    ratio_from_df = str(df.loc[1, haulNumber]).split(".")[0]
+    actual_ratio = float(f"0.{ratio_from_df}")
+
+    #Visual Output
+    print(f"Predicted ratio of sprat: {predicted_ratio:.2f}")
+    print(f"Actual ratio is {actual_ratio}")
+    
+    return predicted_ratio, actual_ratio
+
+def computeError(data):
+    #MSE
+    error = 0
+    for item in data:
+        error += np.sqrt(np.square(item[0]-item[1]))
+        
+    error = error/len(data)
+    return error
+
+image_file_name = "T1_proov_20241014_065408841.jpg"
+testAgainstAllStockMixtures()
