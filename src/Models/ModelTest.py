@@ -60,7 +60,7 @@ def testAgainstAllStockMixtures():
     pass
 
 
-def testModelOnImage(image_path):
+def testModelOnImage(image_path, verbose : None = False):
     
     #True Ratio Extraction
     image_file_name = image_path.split("/")[-1]
@@ -74,9 +74,10 @@ def testModelOnImage(image_path):
     ratio_from_df = str(df.loc[1, haulNumber]).split(".")[0]
     actual_ratio = float(f"0.{ratio_from_df}")
 
-    #Visual Output
-    print(f"Predicted ratio of sprat: {predicted_ratio:.2f}")
-    print(f"Actual ratio is {actual_ratio}")
+    if verbose:
+        #Visual Output
+        print(f"Predicted ratio of sprat: {predicted_ratio:.2f}")
+        print(f"Actual ratio is {actual_ratio}")
     
     return predicted_ratio, actual_ratio
 
@@ -87,7 +88,8 @@ def computeError(data):
         error += np.sqrt(np.square(item[0]-item[1]))
         
     error = error/len(data)
+    
     return error
 
 image_file_name = "T1_proov_20241014_065408841.jpg"
-testAgainstAllStockMixtures()
+error = testAgainstAllStockMixtures()
