@@ -23,21 +23,21 @@ class SingleFishClassification():
         self.mode = mode
         self.sorterType = sorterType
         
-        self.data_path = "../../data/"
+        self.data_path = "../../data/SingleFishes/"
         
         self.folder_output = {
             "test" : {"test": f"Tests/{sorterType}_fish_crops"},
             "prod" : {
-                "herring" : "Identified_Single_Fishes/herring",
-                "sprat" : "Identified_Single_Fishes/sprat"
+                "herring" : "SingleFishes/Identified_Single_Fishes/herring",
+                "sprat" : "SingleFishes/Identified_Single_Fishes/sprat"
             }
         }
         
         self.folder_input = {
             "test" : {"test" : "Tests/test_raw_images"},
             "prod" : {
-                "herring" : "Labeled Images/herring",
-                "sprat" : "Labeled Images/sprat"
+                "herring" : "../Labeled Images/herring",
+                "sprat" : "../Labeled Images/sprat"
             }
         }
         
