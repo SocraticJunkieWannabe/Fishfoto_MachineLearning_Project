@@ -5,6 +5,7 @@ import PredictFishTypeFromSingle.ModelLoader as single
 import pandas as pd
 import os
 import numpy as np
+import random as rand
 
 from PIL import Image
 
@@ -52,20 +53,32 @@ class Dataset():
 
 
 class Model():
-    def __init__(self):
+    def __init__(self, _type : str):
         
         pseudoFile = "pseudo_model.pth" 
         singleFile = "single_model.pth"
         augmentedFile = "real_augemented_model.pth"
-
-        self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{pseudoFile}")
-
-        pass
-
+        
+        typeList = ["pseudo", "single", "augmentedFile"]
+        
+        if _type in typeList:
+            if _type == "pseudo":
+                self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{pseudoFile}")
+            elif _type == "single":
+                self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{singleFile}")
+            elif _type == "augmentedFile":
+                self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{augmentedFile}")
+                
+                
+            return
+        
+        print("WRONG TYPE INPUTTED")   
+        
 class MixtureTest():
-    def __init__(self, model : Model, df):
+    def __init__(self, model : Model, df, verbose : bool = True):
         self.tested_model = model
         self.df = df
+        self.verbose = verbose
         pass
 
     def predict_ratio(self, model, image_path):
@@ -75,25 +88,44 @@ class MixtureTest():
             ratio = model(image).item()
         return ratio
 
-    def testAgainstAllStockMixtures(self, verbose : bool = False):
+    def testAgainstAllStockMixtures(self):
         mixtures_images_path = "../../data/Labeled Images/mixture"
         
         folderContent = os.listdir(mixtures_images_path)
-        ratios = []
+        modelErrors = []
+        dummyRandomErrors = []
+        dummyConstantErrors = []
         
         for fileName in folderContent:
-            print(f"testing model on {fileName}")
-            output = self.testModelOnImage(f"{mixtures_images_path}/{fileName}", verbose)
+            
+            output = self.testModelOnImage(f"{mixtures_images_path}/{fileName}")
+            
             if output != None:
-                ratios.append(output)
+                error = self.computeError(output)
+                modelErrors.append(error)
+                
+                if self.verbose:
+                    print(f"Tested on {fileName} with {round(error, 2)} error")
+                    
+                #COMPUTE DUMMY ERRORS
+                
+                randOutput = (rand.random(), output[1])
+                cstOutput = (0.5, output[1])
+                
+                dummyRandError = self.computeError(randOutput)
+                dummyRandomErrors.append(dummyRandError)
+                
+                dummyCstError = self.computeError(cstOutput)
+                dummyConstantErrors.append(dummyCstError)
+               
+        dummyRandTotal = self.computeTotalError(dummyRandomErrors)
+        dummyConstTotal = self.computeTotalError(dummyConstantErrors)
+        modelTotal = self.computeTotalError(modelErrors)
         
-        if verbose:
-            print(self.computeError(ratios))
-        
-        pass
+        return modelTotal, max(modelErrors), min(modelErrors), dummyRandTotal, dummyConstTotal
 
 
-    def testModelOnImage(self, image_path, verbose : None = False):
+    def testModelOnImage(self, image_path):
         
         #True Ratio Extraction
         image_file_name = image_path.split("/")[-1]
@@ -107,19 +139,41 @@ class MixtureTest():
         ratio_from_df = str(self.df.loc[1, haulNumber]).split(".")[0]
         actual_ratio = float(f"0.{ratio_from_df}")
 
-        if verbose:
+        if self.verbose:
             #Visual Output
             print(f"Predicted ratio of sprat: {predicted_ratio:.2f}")
             print(f"Actual ratio is {actual_ratio}")
         
-        return predicted_ratio, actual_ratio
+        return (predicted_ratio, actual_ratio)
 
     def computeError(self, data):
         #MSE
-        error = 0
-        for item in data:
-            error += np.sqrt(np.square(item[0]-item[1]))
-            
-        error = error/len(data)
+        error = abs(data[0]-data[1])
         
         return error
+    
+    def computeTotalError(self, errors):
+        totalError = sum(errors)/len(errors)
+        return totalError
+    
+
+def testPseudoMixtures(verbose : bool = True):
+    
+    if verbose:
+        print("Started testing the Pseudo Mixture Model")
+        
+    totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest(Model("pseudo"), Dataset().df, verbose).testAgainstAllStockMixtures()
+    
+    print("---------------------------------------------------------------------------------")
+    
+    print(f"Pseudo Mixture Model Error came back to {round(totalError, 3)}, with a range of [{round(minError, 3)}, {round(maxError, 3)}]")
+    print(f"By comparaison, a random predcition gives {round(dummyRandError, 3)}, and guessing 0.5 every time gives {dummyConstantError}")
+    
+    if verbose:
+        if totalError > dummyRandError:
+            print("We have a problem, randomly guessing does better than the model")
+        elif totalError > dummyConstantError:
+            print("We have a problem, guessing the same number each time does better model")
+    pass
+
+testPseudoMixtures()

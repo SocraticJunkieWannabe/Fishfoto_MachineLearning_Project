@@ -64,7 +64,9 @@ class IndexImages():
         config = {
         "herring" : [],
         "sprat": [],
-        "mixture": []
+        "mixture": [],
+        "stickleback": [],
+        "smelt": []
         }
         
         folderContent = os.listdir(self.stock_images_path)

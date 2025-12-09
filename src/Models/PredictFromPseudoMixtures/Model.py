@@ -11,15 +11,18 @@ from torchvision import transforms, models
 
 import matplotlib.pyplot as plt
 
+import pandas as pd
+
 
 data_path = "../../../data"
 pseudo_mixtures_paths = glob.glob(f"{data_path}/Pseudo_Mixtures/*.jpg")
 
 labels = {}
 
-for path in pseudo_mixtures_paths:
-    ratio = path.split(".jpg")[-2].split("_")[-1]
-    labels[path] = float(ratio)
+df = pd.read_csv('../../data/Pseudo_Mixtures/ratios.csv', sep=",")
+
+for index, row in df.iterrows():
+    labels[row['path']] = [float(row['spratRatio']), float(row['herringRatio']), float(row['smelt']), float(row['stickleback'])]
     
 # 2. Custom dataset
 class RatioDataset(Dataset):
@@ -31,11 +34,14 @@ class RatioDataset(Dataset):
         return len(self.items)
 
     def __getitem__(self, idx):
-        img_path, ratio = self.items[idx]
+        img_path, ratio_vector = self.items[idx]
         image = Image.open(img_path).convert("RGB")
         if self.transform:
             image = self.transform(image)
-        return image, torch.tensor([ratio], dtype=torch.float32)
+        
+        ratio_vector = torch.tensor(ratio_vector, dtype=torch.float32)    
+        
+        return image, ratio_vector
 
 # 3. Transforms
 transform = transforms.Compose([
@@ -62,8 +68,8 @@ model = models.resnet18(pretrained=True)
 model.fc = nn.Sequential(
     nn.Linear(model.fc.in_features, 128),
     nn.ReLU(),
-    nn.Linear(128, 1),
-    nn.Sigmoid()  # output between 0 and 1
+    nn.Linear(128, 4),     # output 4 values
+    nn.Softmax(dim=1)      # ensure they sum to 1
 )
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

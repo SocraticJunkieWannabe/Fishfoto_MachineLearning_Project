@@ -28,8 +28,10 @@ class SingleFishClassification():
         self.folder_output = {
             "test" : {"test": f"Tests/{sorterType}_fish_crops"},
             "prod" : {
-                "herring" : "SingleFishes/Identified_Single_Fishes/herring",
-                "sprat" : "SingleFishes/Identified_Single_Fishes/sprat"
+                "herring" : "Identified_Single_Fishes/herring",
+                "sprat" : "Identified_Single_Fishes/sprat",
+                "stickleback": "Identified_Single_Fishes/stickleback",
+                "smelt": "Identified_Single_Fishes/smelt"
             }
         }
         
@@ -37,7 +39,9 @@ class SingleFishClassification():
             "test" : {"test" : "Tests/test_raw_images"},
             "prod" : {
                 "herring" : "../Labeled Images/herring",
-                "sprat" : "../Labeled Images/sprat"
+                "sprat" : "../Labeled Images/sprat",
+                "stickleback": "../Labeled Images/stickleback",
+                "smelt": "../Labeled Images/smelt"
             }
         }
         
@@ -64,7 +68,7 @@ class SingleFishClassification():
     def initOuputFolders(self):
         
         if self.mode == "prod":
-            os.makedirs(f"{self.data_path}/Identified_Single_Fishes", exist_ok=True)
+            os.makedirs(f"{self.data_path}", exist_ok=True)
             
             for folder_path in self.folder_output["prod"].values():
                 os.makedirs(f"{self.data_path}/{folder_path}", exist_ok=True)
