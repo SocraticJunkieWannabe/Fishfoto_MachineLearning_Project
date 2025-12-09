@@ -64,9 +64,24 @@ def cleanProdCrops():
     
     pass
 
+def cleanLabeledImages():
+    folders = ["herring", "sprat","mixture"]
+    
+    for folder in folders:
+        deleteFolderContent(f"../../data/Labeled Images/{folder}")
+    
+    pass
+
+def cleanRealMixImages():
+    deleteFolderContent(f"../../data/Real_Mixtures_Augmented/")
+    
+    pass
+
 def cleanAllReps():
     cleanTestFishAndBundleCrops()
     cleanProdCrops()
     pass
 
-cleanAllReps()
+#cleanAllReps()
+#cleanLabeledImages()
+cleanRealMixImages()
