@@ -3,7 +3,7 @@ In your folder there needs to be:
     - a function allowing to reload the model from the saved .pth file, which should return
       the model instance with its weights loaded, the ML device, and any transform used on the images (if used)
       ex: 
-      def loadModel():
+      def loadModel(model_file_path):
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
             # 1️⃣ Define the model architecture (same as during training)
@@ -16,7 +16,7 @@ In your folder there needs to be:
             )
 
             # 2️⃣ Load saved weights
-            model.load_state_dict(torch.load("ratio_model.pth", map_location=device))
+            model.load_state_dict(torch.load(model_file_path, map_location=device))
             model.to(device)
             model.eval()
             print("✅ Model loaded successfully!")

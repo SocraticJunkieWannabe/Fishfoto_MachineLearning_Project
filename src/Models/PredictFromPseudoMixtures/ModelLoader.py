@@ -3,7 +3,7 @@ from torch import nn
 from torchvision import transforms, models
 
 
-def loadModel():
+def loadModel(model_file_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1️⃣ Define the model architecture (same as during training)
@@ -16,7 +16,7 @@ def loadModel():
     )
 
     # 2️⃣ Load saved weights
-    model.load_state_dict(torch.load("model.pth", map_location=device))
+    model.load_state_dict(torch.load(model_file_path, map_location=device))
     model.to(device)
     model.eval()
     print("✅ Model loaded successfully!")
