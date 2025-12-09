@@ -73,7 +73,11 @@ def cleanLabeledImages():
     pass
 
 def cleanRealMixImages():
-    deleteFolderContent(f"../../data/Real_Mixtures_Augmented/")
+    
+    folders = ["training","testing"]
+    
+    for folder in folders:
+        deleteFolderContent(f"../../data/Real_Mixtures_Augmented/{folder}")
     
     pass
 
