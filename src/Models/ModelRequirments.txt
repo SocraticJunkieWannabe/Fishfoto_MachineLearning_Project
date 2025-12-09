@@ -1,8 +1,7 @@
 In your folder there needs to be:
- - a model file called "model.pth"
- - a Model.py file containing:
+ - a ModelLoader.py file containing:
     - a function allowing to reload the model from the saved .pth file, which should return
-      the model instance with its weights loaded, and any transform used on the images (if used)
+      the model instance with its weights loaded, the ML device, and any transform used on the images (if used)
       ex: 
       def loadModel():
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,4 +28,7 @@ In your folder there needs to be:
                                     [0.229, 0.224, 0.225])
             ])
 
-            return (model, transform)
+            return (deveice, model, transform)
+
+In the ModelFiles folder there must be:
+  -your model file called "{type}_model.pth" ex "pseudo_model.pth" or "single_model.pth" or "real_augemented_model.pth"
