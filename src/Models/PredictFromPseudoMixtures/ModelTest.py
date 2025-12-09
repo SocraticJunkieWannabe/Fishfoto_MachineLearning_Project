@@ -8,33 +8,14 @@ import pandas as pd
 import os
 import numpy as np
 
+import PredictFromPseudoMixtures as pseudo
+
 df = pd.read_csv('../../data/percentages.csv', sep=";")
 print(df)
 
 #FROM CNN#
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 1️⃣ Define the model architecture (same as during training)
-model = models.resnet18(pretrained=False)
-model.fc = nn.Sequential(
-    nn.Linear(model.fc.in_features, 128),
-    nn.ReLU(),
-    nn.Linear(128, 1),
-    nn.Sigmoid()  # output between 0 and 1
-)
-
-# 2️⃣ Load saved weights
-model.load_state_dict(torch.load("ratio_model.pth", map_location=device))
-model.to(device)
-model.eval()
-print("✅ Model loaded successfully!")
-
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406],
-                         [0.229, 0.224, 0.225])
-])
+device, model, transform = pseudo.loadModel()
 
 def predict_ratio(model, image_path):
     image = Image.open(image_path).convert("RGB")
@@ -92,4 +73,4 @@ def computeError(data):
     return error
 
 image_file_name = "T1_proov_20241014_065408841.jpg"
-error = testAgainstAllStockMixtures()
+#error = testAgainstAllStockMixtures()
