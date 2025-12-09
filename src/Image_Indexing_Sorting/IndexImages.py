@@ -47,10 +47,12 @@ class IndexImages():
         for fileName in folderContent:
             if fileName.split(".")[-1] == "jpg":
                 old_filename = fileName
+                fileName = fileName.replace("r_im", "räim")
                 fileName = fileName.replace("_", " ")
                 fileName = fileName.replace("-", " ")
-                
+            
                 fileName = fileName.replace(" ", "_")
+                
                 
                 os.rename(f"{self.stock_images_path}/{old_filename}", f"{self.stock_images_path}/{fileName}")
         pass
