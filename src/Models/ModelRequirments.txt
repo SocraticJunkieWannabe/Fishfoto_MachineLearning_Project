@@ -29,6 +29,7 @@ In your folder there needs to be:
             ])
 
             return (deveice, model, transform)
+      - Comments allowing me to understand the type of data outputed by the model
 
 In the ModelFiles folder there must be:
   -your model file called "{type}_model.pth" ex "pseudo_model.pth" or "single_model.pth" or "real_augemented_model.pth"

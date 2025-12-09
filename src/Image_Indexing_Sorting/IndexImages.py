@@ -14,7 +14,9 @@ class IndexImages():
         self.translate = {
             "räim" : "herring",
             "kilu": "sprat",
-            "proov": "mixture"
+            "proov": "mixture",
+            "ogalik": "stickleback",
+            "tint": "smelt"
         }
         
         self.stock_images_path = stock_images_path
