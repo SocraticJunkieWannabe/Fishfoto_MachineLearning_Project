@@ -1,0 +1,22 @@
+In your folder there needs to be:
+ - a model file called "model.pth"
+ - a Model.py file containing:
+    - a function allowing to reload the model from the saved .pth file, which should return
+      the model instance with its weights loaded
+      ex: 
+      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # 1️⃣ Define the model architecture (same as during training)
+    model = models.resnet18(pretrained=False)
+    model.fc = nn.Sequential(
+        nn.Linear(model.fc.in_features, 128),
+        nn.ReLU(),
+        nn.Linear(128, 1),
+        nn.Sigmoid()  # output between 0 and 1
+    )
+
+    # 2️⃣ Load saved weights
+    model.load_state_dict(torch.load("ratio_model.pth", map_location=device))
+    model.to(device)
+    model.eval()
+    print("✅ Model loaded successfully!")
