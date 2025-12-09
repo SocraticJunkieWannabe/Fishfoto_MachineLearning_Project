@@ -59,14 +59,14 @@ class Model():
         singleFile = "single_model.pth"
         augmentedFile = "real_augemented_model.pth"
         
-        typeList = ["pseudo", "single", "augmentedFile"]
+        typeList = ["pseudo", "single", "augmented"]
         
         if _type in typeList:
             if _type == "pseudo":
                 self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{pseudoFile}")
             elif _type == "single":
                 self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{singleFile}")
-            elif _type == "augmentedFile":
+            elif _type == "augmented":
                 self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{augmentedFile}")
                 
                 
@@ -157,16 +157,21 @@ class MixtureTest():
         return totalError
     
 
-def testPseudoMixtures(verbose : bool = True):
+def testMixtures(type : str = "pseudo", verbose : bool = True):
+
+    if type == "pseudo":
+        modelName = "Pseudo"
+    elif type == "augmented":
+        modelName = "Real Augmented"
     
     if verbose:
-        print("Started testing the Pseudo Mixture Model")
+        print(f"Started testing the {modelName} Mixture Model")
         
-    totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest(Model("pseudo"), Dataset().df, verbose).testAgainstAllStockMixtures()
+    totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest(Model(type), Dataset().df, verbose).testAgainstAllStockMixtures()
     
     print("---------------------------------------------------------------------------------")
     
-    print(f"Pseudo Mixture Model Error came back to {round(totalError, 3)}, with a range of [{round(minError, 3)}, {round(maxError, 3)}]")
+    print(f"{modelName} Mixture Model Error came back to {round(totalError, 3)}, with a range of [{round(minError, 3)}, {round(maxError, 3)}]")
     print(f"By comparaison, a random predcition gives {round(dummyRandError, 3)}, and guessing 0.5 every time gives {dummyConstantError}")
     
     if verbose:
@@ -176,4 +181,4 @@ def testPseudoMixtures(verbose : bool = True):
             print("We have a problem, guessing the same number each time does better model")
     pass
 
-testPseudoMixtures()
+testMixtures("augmented")

@@ -22,7 +22,7 @@ labels = {}
 df = pd.read_csv('../../data/Pseudo_Mixtures/ratios.csv', sep=",")
 
 for index, row in df.iterrows():
-    labels[row['path']] = [float(row['spratRatio']), float(row['herringRatio']), float(row['smelt']), float(row['stickleback'])]
+    labels[row['path']] = [float(row['spratRatio']), float(row['herringRatio']), float(row['smeltRatio']), float(row['sticklebackRatio'])]
     
 # 2. Custom dataset
 class RatioDataset(Dataset):
