@@ -1,5 +1,6 @@
 import glob
 import os
+import random
 import cv2
 import numpy as np
 import albumentations as A
@@ -10,55 +11,55 @@ from tqdm import tqdm
 # PATHS
 # -----------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "data"))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+DATA_PATH = os.path.join(PROJECT_ROOT, "data")
 
-real_mixture_path = os.path.join(data_path, "Labeled Images", "mixture")
-augmented_mixtures_path = os.path.join(data_path, "Real_Mixtures_Augmented")
+INPUT_FOLDER = os.path.join(DATA_PATH, "Labeled Images", "mixture")
+OUTPUT_BASE = os.path.join(DATA_PATH, "Real_Mixtures_Augmented")
 
-os.makedirs(augmented_mixtures_path, exist_ok=True)
+TRAIN_FOLDER = os.path.join(OUTPUT_BASE, "training")
+TEST_FOLDER  = os.path.join(OUTPUT_BASE, "testing")
 
-mixture_paths = (
-    glob.glob(os.path.join(real_mixture_path, "*.png")) +
-    glob.glob(os.path.join(real_mixture_path, "*.jpg")) +
-    glob.glob(os.path.join(real_mixture_path, "*.jpeg"))
+os.makedirs(TRAIN_FOLDER, exist_ok=True)
+os.makedirs(TEST_FOLDER, exist_ok=True)
+
+# Load images (png + jpg + jpeg)
+image_paths = (
+    glob.glob(os.path.join(INPUT_FOLDER, "*.png")) +
+    glob.glob(os.path.join(INPUT_FOLDER, "*.jpg")) +
+    glob.glob(os.path.join(INPUT_FOLDER, "*.jpeg"))
 )
 
-print("INPUT:", real_mixture_path)
-print("OUTPUT:", augmented_mixtures_path)
-print("IMAGES FOUND:", len(mixture_paths))
+print("INPUT FOLDER:", INPUT_FOLDER)
+print("TOTAL IMAGES FOUND:", len(image_paths))
+print("TRAIN FOLDER:", TRAIN_FOLDER)
+print("TEST FOLDER :", TEST_FOLDER)
+
+
+# -----------------------
+# TRAIN / TEST SPLIT (30% TEST)
+# -----------------------
+random.seed(42)
+random.shuffle(image_paths)
+
+test_size  = int(0.3 * len(image_paths))
+test_images  = image_paths[:test_size]
+train_images = image_paths[test_size:]
+
+print("TRAIN IMAGES:", len(train_images))
+print("TEST IMAGES :", len(test_images))
 
 
 # -----------------------
 # AUGMENTATION CONFIG
 # -----------------------
-AUG_PER_IMAGE = 5
+AUG_PER_IMAGE = 5  # only applied to TRAINING images
 
 
 # -----------------------
-# GEOMETRY HELPERS
+# CROP
 # -----------------------
-def order_points(pts):
-    rect = np.zeros((4, 2), dtype="float32")
-
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]      # top-left
-    rect[2] = pts[np.argmax(s)]      # bottom-right
-
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]   # top-right
-    rect[3] = pts[np.argmax(diff)]   # bottom-left
-
-    return rect
-
-
-def crop_to_inner_box_with_perspective(image, margin_ratio=0.03):
-    """
-    Detects the main box using contours.
-    Applies perspective correction only if a large quadrilateral is found.
-    Otherwise falls back to a bounding-box crop.
-    Always crops slightly inside to avoid box edges and floor.
-    """
-
+def crop_to_inner_box_fast(image, margin_ratio=0.03):
     H, W = image.shape[:2]
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -74,58 +75,10 @@ def crop_to_inner_box_with_perspective(image, margin_ratio=0.03):
         return image
 
     main = max(contours, key=cv2.contourArea)
-    area = cv2.contourArea(main)
-
-    if area < 0.4 * H * W:
-        return image
-
-    peri = cv2.arcLength(main, True)
-    approx = cv2.approxPolyDP(main, 0.02 * peri, True)
-
-    if len(approx) == 4:
-        pts = approx.reshape(4, 2).astype("float32")
-        rect = order_points(pts)
-
-        (tl, tr, br, bl) = rect
-
-        widthA = np.linalg.norm(br - bl)
-        widthB = np.linalg.norm(tr - tl)
-        maxWidth = int(max(widthA, widthB))
-
-        heightA = np.linalg.norm(tr - br)
-        heightB = np.linalg.norm(tl - bl)
-        maxHeight = int(max(heightA, heightB))
-
-        if maxWidth > 0.5 * W and maxHeight > 0.5 * H:
-            dst = np.array(
-                [
-                    [0, 0],
-                    [maxWidth - 1, 0],
-                    [maxWidth - 1, maxHeight - 1],
-                    [0, maxHeight - 1],
-                ],
-                dtype="float32",
-            )
-
-            M = cv2.getPerspectiveTransform(rect, dst)
-            warped = cv2.warpPerspective(
-                image,
-                M,
-                (maxWidth, maxHeight),
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=(0, 0, 0),
-            )
-
-            h, w = warped.shape[:2]
-            mx = int(w * margin_ratio)
-            my = int(h * margin_ratio)
-
-            warped = warped[my:h - my, mx:w - mx]
-
-            if warped.shape[0] > 0.4 * H and warped.shape[1] > 0.4 * W:
-                return warped
-
     x, y, w, h = cv2.boundingRect(main)
+
+    if w < 0.4 * W or h < 0.4 * H:
+        return image
 
     mx = int(w * margin_ratio)
     my = int(h * margin_ratio)
@@ -137,14 +90,14 @@ def crop_to_inner_box_with_perspective(image, margin_ratio=0.03):
 
     cropped = image[y1:y2, x1:x2]
 
-    if cropped.shape[0] < 0.4 * H or cropped.shape[1] < 0.4 * W:
+    if cropped.size == 0:
         return image
 
     return cropped
 
 
 # -----------------------
-# PURE PHOTO-LIKE AUGMENTATION
+# AUGMENTATION
 # -----------------------
 augmenter = A.Compose([
     A.Affine(
@@ -176,28 +129,55 @@ def rotate_discrete(image):
 
 
 # -----------------------
-# MAIN LOOP
+# PROCESS TRAINING IMAGES (W/ AUGMENT)
 # -----------------------
-for img_path in tqdm(mixture_paths):
+print("\nPROCESSING TRAINING IMAGES...")
+
+for img_path in tqdm(train_images):
     filename = os.path.basename(img_path)
     base_name = os.path.splitext(filename)[0]
 
     image = cv2.imread(img_path)
     if image is None:
-        print("FAILED TO LOAD:", img_path)
         continue
 
-    cropped = crop_to_inner_box_with_perspective(image, margin_ratio=0.03)
+    cropped = crop_to_inner_box_fast(image)
 
     for i in range(AUG_PER_IMAGE):
         rotated = rotate_discrete(cropped)
         augmented = augmenter(image=rotated)["image"]
 
         out_path = os.path.join(
-            augmented_mixtures_path,
+            TRAIN_FOLDER,
             f"{base_name}_aug_{i}.png"
         )
 
         cv2.imwrite(out_path, augmented)
 
-print("Augmentation completed.")
+
+# -----------------------
+# PROCESS TEST IMAGES (W/o AUGMENT)
+# -----------------------
+print("\nPROCESSING TEST IMAGES (W/o AUGMENT)...")
+
+for img_path in tqdm(test_images):
+    filename = os.path.basename(img_path)
+    base_name = os.path.splitext(filename)[0]
+
+    image = cv2.imread(img_path)
+    if image is None:
+        continue
+
+    cropped = crop_to_inner_box_fast(image)
+
+    out_path = os.path.join(
+        TEST_FOLDER,
+        f"{base_name}.png"
+    )
+
+    cv2.imwrite(out_path, cropped)
+
+
+print("\nREAL MIXTURE DATASET READY!")
+print("Training images  ->", TRAIN_FOLDER)
+print("Testing images   ->", TEST_FOLDER)
