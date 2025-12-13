@@ -7,13 +7,14 @@ def loadModel(model_file_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1️⃣ Define the model architecture (same as during training)
-    model = models.resnet18(pretrained=False)
+    model = models.resnet18(pretrained=True)
     model.fc = nn.Sequential(
         nn.Linear(model.fc.in_features, 128),
         nn.ReLU(),
-        nn.Linear(128, 1),
-        nn.Sigmoid()  # output between 0 and 1
+        nn.Linear(128, 4),     # output 4 values
+        nn.Softmax(dim=1)      # ensure they sum to 1
     )
+
 
     # 2️⃣ Load saved weights
     model.load_state_dict(torch.load(model_file_path, map_location=device))

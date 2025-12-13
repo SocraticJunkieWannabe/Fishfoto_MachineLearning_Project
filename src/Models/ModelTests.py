@@ -57,24 +57,22 @@ class Model():
         
         pseudoFile = "pseudo_model.pth" 
         singleFile = "single_model.pth"
-        augmentedFile = "real_augemented_model.pth"
+        augmentedFile = "real_augmented_model.pth"
         
         typeList = ["pseudo", "single", "augmented"]
         
         if _type in typeList:
             if _type == "pseudo":
                 self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{pseudoFile}")
-            elif _type == "single":
-                self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{singleFile}")
             elif _type == "augmented":
-                self.device, self.model, self.transform = pseudo.loadModel(f"ModelFiles/{augmentedFile}")
+                self.device, self.model, self.transform = aug.loadModel(f"ModelFiles/{augmentedFile}")
                 
                 
             return
         
         print("WRONG TYPE INPUTTED")   
         
-class MixtureTest():
+class MixtureTest_1Class():
     def __init__(self, model : Model, df, verbose : bool = True):
         self.tested_model = model
         self.df = df
@@ -156,18 +154,115 @@ class MixtureTest():
         totalError = sum(errors)/len(errors)
         return totalError
     
+class MixtureTest_2ClassesOrMore():
+    def __init__(self, model : Model, df, verbose : bool = True):
+        self.tested_model = model
+        self.df = df
+        self.verbose = verbose
+        pass
+
+    def predict_ratio(self, model, image_path):
+        image = Image.open(image_path).convert("RGB")
+        image = self.tested_model.transform(image).unsqueeze(0).to(self.tested_model.device)
+        with torch.no_grad():
+            ratios = model(image).squeeze(0).detach().cpu().numpy().tolist()
+        return ratios
+
+    def testAgainstAllStockMixtures(self):
+        mixtures_images_path = "../../data/Labeled Images/mixture"
+        
+        folderContent = os.listdir(mixtures_images_path)
+        modelErrors = []
+        dummyRandomErrors = []
+        dummyConstantErrors = []
+        
+        for fileName in folderContent:
+            
+            output = self.testModelOnImage(f"{mixtures_images_path}/{fileName}")
+            
+            if output != None:
+                error = self.computeError(output)
+                modelErrors.append(error)
+                
+                if self.verbose:
+                    print(f"Tested on {fileName} with {round(error, 2)} error")
+                    
+                #COMPUTE DUMMY ERRORS
+                
+                randOutput = ([rand.random(), rand.random(), rand.random(), rand.random()], 
+                              output[1])
+                cstOutput = ([0.5, 0.5, 0.5, 0.5], output[1])
+                
+                dummyRandError = self.computeError(randOutput)
+                dummyRandomErrors.append(dummyRandError)
+                
+                dummyCstError = self.computeError(cstOutput)
+                dummyConstantErrors.append(dummyCstError)
+               
+        dummyRandTotal = self.computeTotalError(dummyRandomErrors)
+        dummyConstTotal = self.computeTotalError(dummyConstantErrors)
+        modelTotal = self.computeTotalError(modelErrors)
+        
+        return modelTotal, max(modelErrors), min(modelErrors), dummyRandTotal, dummyConstTotal
+
+
+    def testModelOnImage(self, image_path):
+        
+        #True Ratio Extraction
+        image_file_name = image_path.split("/")[-1]
+        haulNumber = image_file_name.split("_")[0].split("T")[1]
+        
+        if haulNumber not in self.df.columns:
+            return None
+
+        predicted_ratios = self.predict_ratio(self.tested_model.model, image_path)
+
+        actual_ratios = self.df[haulNumber].to_list()
+
+        if self.verbose:
+            #Visual Output
+            print(f"Predicted ratios: {predicted_ratios}")
+            print(f"Actual ratios: {actual_ratios}")
+        
+        return (predicted_ratios, actual_ratios)
+
+    def computeError(self, data):
+        #MSE
+        predicted_values = data[0]
+        real_values = data[1]
+        
+        error = np.sqrt(np.square(predicted_values[0]-real_values[0]) + 
+                        np.square(predicted_values[1]-real_values[1]) +
+                        np.square(predicted_values[2]-real_values[2]) +
+                        np.square(predicted_values[3]-real_values[3])
+                        )
+        
+        return error
+    
+    def computeTotalError(self, errors):
+        totalError = sum(errors)/len(errors)
+        return totalError
+    
 
 def testMixtures(type : str = "pseudo", verbose : bool = True):
 
     if type == "pseudo":
         modelName = "Pseudo"
+        totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest_2ClassesOrMore(
+            Model(type), 
+            Dataset().df, 
+            verbose).testAgainstAllStockMixtures()
     elif type == "augmented":
         modelName = "Real Augmented"
+        totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest_1Class(
+            Model(type), 
+            Dataset().df, 
+            verbose).testAgainstAllStockMixtures()
     
     if verbose:
         print(f"Started testing the {modelName} Mixture Model")
         
-    totalError, minError, maxError, dummyRandError, dummyConstantError = MixtureTest(Model(type), Dataset().df, verbose).testAgainstAllStockMixtures()
+    
     
     print("---------------------------------------------------------------------------------")
     
@@ -181,4 +276,5 @@ def testMixtures(type : str = "pseudo", verbose : bool = True):
             print("We have a problem, guessing the same number each time does better model")
     pass
 
-testMixtures("augmented")
+testMixtures("pseudo", False)
+testMixtures("augmented", False)

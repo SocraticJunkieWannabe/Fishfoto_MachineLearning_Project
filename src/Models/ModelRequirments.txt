@@ -28,7 +28,7 @@ In your folder there needs to be:
                                     [0.229, 0.224, 0.225])
             ])
 
-            return (deveice, model, transform)
+            return (device, model, transform)
       - Comments allowing me to understand the type of data outputed by the model
 
 In the ModelFiles folder there must be:

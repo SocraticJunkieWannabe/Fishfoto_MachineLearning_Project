@@ -1,4 +1,5 @@
 import Image_Indexing_Sorting.IndexImages as II
+import Training_Images_Creation.RealMixtureAugmentor
 
 stock_images_path = "../data/Stock Images"
 target_sorted_copy_path = "../data/Labeled Images"
