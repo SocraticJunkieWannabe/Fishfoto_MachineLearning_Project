@@ -65,3 +65,18 @@ To ensure the project is correctly configured:
 
    If this does not work refer to the album.html file in the src folder
 
+## Directories
+
+The "Models" directory contains all of the model trained during the project, along with a testing file. This entails:
+
+1. A Model to destinguish single sprats from herrings
+2. A Model trained on pseudo mixtures
+3. A model trained on augmented real mixtures
+
+The "Single Fish Sorting" directory has all the files pertaining to the identfication of single fishes
+
+The "Image Indexing Sorting" directory is for the files related to the labellling of the dataset
+
+The "Image_Processing" directory is for the files related to processing images
+
+Finally, the "utils" directory is for any files which proved useful to save time during devlopment 
