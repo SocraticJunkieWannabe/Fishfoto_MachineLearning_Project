@@ -81,6 +81,13 @@ def cleanRealMixImages():
     
     pass
 
+def cleanSingleFishes():
+    folders = ["from_mixtures_training"]
+    for folder in folders:
+        deleteFolderContent(f"../../data/Identified_Single_Fishes/{folder}")
+    
+    pass
+
 def cleanAllReps():
     cleanTestFishAndBundleCrops()
     cleanProdCrops()
@@ -89,3 +96,4 @@ def cleanAllReps():
 #cleanAllReps()
 #cleanLabeledImages()
 cleanRealMixImages()
+cleanSingleFishes()
