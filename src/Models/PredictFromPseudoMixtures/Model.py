@@ -19,10 +19,10 @@ pseudo_mixtures_paths = glob.glob(f"{data_path}/Pseudo_Mixtures/*.jpg")
 
 labels = {}
 
-df = pd.read_csv('../../data/Pseudo_Mixtures/ratios.csv', sep=",")
+df = pd.read_csv(f'{data_path}/Pseudo_Mixtures/ratios.csv', sep=",")
 
 for index, row in df.iterrows():
-    labels[row['path']] = [float(row['spratRatio']), float(row['herringRatio']), float(row['smeltRatio']), float(row['sticklebackRatio'])]
+    labels[row['path']] = [round(row['spratRatio'], 3), round(row['herringRatio'], 3), round(row['smeltRatio'], 3), round(row['sticklebackRatio'], 3)]
     
 # 2. Custom dataset
 class RatioDataset(Dataset):
@@ -83,7 +83,9 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 num_epochs = 10
 train_losses = []
 val_losses = []
-
+ 
+print("Started training")
+ 
 for epoch in range(num_epochs):
     # --- TRAINING ---
     model.train()
@@ -119,7 +121,7 @@ for epoch in range(num_epochs):
 
     print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {epoch_train_loss:.4f} | Val Loss: {epoch_val_loss:.4f}")
 
-torch.save(model.state_dict(), "ratio_model.pth")
+torch.save(model.state_dict(), "../ModelFiles/pseudo_model.pth")
 print("Model saved!")
 
 # 8. Performance Graph

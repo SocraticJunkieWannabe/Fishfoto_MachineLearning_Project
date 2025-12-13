@@ -1,50 +1,67 @@
-# FIshfoto\_MachineLearning\_Project
+# Fishfoto Machine Learning Project
 
-/!\ Les photos sont pas dans le GitHub faut les télécharger et les mettre dans un dossier root de la rep called "Images"
+This project focuses on fish image processing and classification using machine learning techniques.
 
-(c'est les photos downloaded from le dossier "BIAS kalapildid" dans le sharepoint du pelo ou depuis ce lien: https://ibb.co/album/TBq199)
-(link to the Pseudo Mixtures: https://ibb.co/album/s5Z6yQ)
-THe pseudo mxitures image go into the "data/Peudo_Mixtures"
+---
 
-Pour bien etre a jour:
+## Image Data (Required)
 
- - Importer les images de "BIAS kalapildid" dans data/Stock Images
- - run le setup.py
+⚠️ Images are NOT included in this GitHub repository.
+You must download and place them manually.
 
-HOW TO DOWNLOAD IMAGES FROM ibb LINK:
+### Image Sources
 
-    1. In the albmu Go to Embed Codes and select HTML Image from the dropdown
+- Stock Images (BIAS kalapildid)
+  From this link:
+  https://ibb.co/album/TBq199
 
-    2. Copy the entire text field, paste it into a text document. Save the document as album.html
+- Pseudo Mixtures
+  Download from:
+  https://ibb.co/album/hFVwJ2
 
-    3. Open the document. Ctrl + I
+---
 
-    4. On the Media tab click Select All and Save As
+## Required Directory Structure
 
-    5. Select/ create a folder and wait for the download to complete (may take some time)
+After downloading, organize the images as follows:
 
-INFO:
+project-root/
+├── data/
+│   ├── Stock Images/        
+│   └── Pseudo_Mixtures/    
+├── setup.py
+└── ...
 
-Le fichier indexed_images_config.json contient l'indexaction des photos en fonction de leur type (poisson mix vs indetifier), créer avec IndexImages.py
+---
 
-Le fichier SingleFishDetection dans Single Fish Sorting permet de split les images du pelo into des images singuliers de poissons. Faut avoir fait tourner le fichierqui les index bien entendu
+## Setup Instructions
 
-TO DO:
+To ensure the project is correctly configured:
 
- - Fix function Image_Processing function to remove bright red and blue hues in images
- - Create feature to identify and extract just the fish mixture rectanle from the Mixtures images
+1. Import all images into:
+   data/Stock Images
 
+2. Place pseudo mixture images into:
+   data/Pseudo_Mixtures
 
- PATH TO IMPROVE:
+3. Run the setup script:
+   python3 setup.py
 
-  look into small scale jattering augmentation ml onto the test set given to only train on it
-  are the fishes by themselves categorizable by a model ?  
+---
 
-  Instance problem -> segmetation problem
+## How to Download Images from an ibb.co Album
 
+1. Open the album link.
+2. Click "Embed Codes" and select "HTML Image" from the dropdown.
+3. Copy the entire text and paste it into a text file.
+4. Save the file as:
+   album.html
+5. Open the file in Firefox.
+6. Press Ctrl + I (Page Info).
+7. Go to the Media tab.
+8. Click Select All → Save As.
+9. Choose or create a folder and wait for the download to complete
+   (this may take some time).
 
-  try the approach by area, by creating pseudo mixtures with a mask (like 1 and 2s pixels) from which we can deduce area coverage and thus percentage by 
-  counting the pixels
-  Try to predict the mask of 1 and 2 on the test set to try go get percentages
+   If this does not work refer to the album.html file in the src folder
 
-The main issue we face in this proejct is that to get a good ratio you need to count and to count that means segmentation problem where we have to identify individual fishes
